@@ -1,0 +1,13 @@
+.navbar{
+    font-family: Bahnschrift;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.nav-link{
+    color: black;
+}
+
+.navbar-brand{
+    padding-left: 20px;
+}
