@@ -1,0 +1,14 @@
+.home{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    text-align: center;
+    height: 80vh;
+  }
+
+.welcome{
+    font-family: Bahnschrift;
+    font-size: 70px;
+    font-weight: bold;
+}
