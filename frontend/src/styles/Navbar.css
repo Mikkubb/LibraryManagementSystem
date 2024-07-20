@@ -2,9 +2,10 @@
     font-family: Bahnschrift;
     font-size: 20px;
     font-weight: bold;
+    color: black;
 }
 
-.nav-link{
+a.nav-link{
     color: black;
 }
 
