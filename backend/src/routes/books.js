@@ -4,7 +4,7 @@ const authenticateToken = require('../middleware/authenticateToken');
 
 const router = express.Router();
 
-
+// Pobieranie książek - dostępne tylko dla zalogowanych użytkowników
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const books = await Book.find();
@@ -14,7 +14,7 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-
+// Dodawanie nowej książki - dostępne tylko dla admina i bibliotekarza
 router.post('/', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin' && req.user.role !== 'librarian') {
     return res.status(403).json({ message: 'Access denied' });
@@ -31,7 +31,7 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-
+// Usuwanie książki - dostępne tylko dla admina i bibliotekarza
 router.delete('/:id', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin' && req.user.role !== 'librarian') {
     return res.status(403).json({ message: 'Access denied' });

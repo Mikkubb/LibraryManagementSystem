@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../styles/Register.css';
 
 const AddLibrarian = () => {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -10,27 +13,30 @@ const AddLibrarian = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/api/auth/register', {
+      const response = await fetch('http://localhost:3001/api/auth/registerLibrarian', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ ...form, role: 'librarian' }),
+        body: JSON.stringify(form),
       });
       if (response.ok) {
         alert('Librarian added successfully');
+        navigate('/');
       } else {
-        alert('Failed to add librarian');
+        const data = await response.json();
+        alert(data.message || 'Failed to add librarian');
       }
     } catch (error) {
       console.error('Error:', error);
+      alert('An error occurred while adding the librarian');
     }
   };
 
   return (
-    <div className="add-librarian-container">
-      <form onSubmit={handleSubmit}>
+    <div className="register-container">
+      <form className="register-form" onSubmit={handleSubmit}>
         <h2>ADD LIBRARIAN</h2>
         <input name="firstName" placeholder="First Name" onChange={handleChange} required />
         <input name="lastName" placeholder="Last Name" onChange={handleChange} required />

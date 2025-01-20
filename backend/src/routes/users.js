@@ -3,7 +3,7 @@ const User = require('../models/User');
 const authorizeRole = require('../middleware/authorizeRole');
 const router = express.Router();
 
-
+// Pobierz listę wszystkich użytkowników (tylko dla admina)
 router.get('/', authorizeRole('admin'), async (req, res) => {
   try {
     const users = await User.find({}, '-password');
@@ -13,7 +13,7 @@ router.get('/', authorizeRole('admin'), async (req, res) => {
   }
 });
 
-
+// Zmień rolę użytkownika (tylko dla admina)
 router.put('/:id/role', authorizeRole('admin'), async (req, res) => {
   const { role } = req.body;
   if (!['user', 'librarian', 'admin'].includes(role)) {
@@ -29,7 +29,7 @@ router.put('/:id/role', authorizeRole('admin'), async (req, res) => {
   }
 });
 
-
+// Usuń użytkownika (tylko dla admina)
 router.delete('/:id', authorizeRole('admin'), async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
