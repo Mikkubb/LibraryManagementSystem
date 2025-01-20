@@ -12,7 +12,11 @@ const EditBook = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://localhost:3001/api/books/${id}`)
+    fetch(`http://localhost:3001/api/books/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    })
       .then(response => response.json())
       .then(data => {
         setTitle(data.title);
@@ -30,7 +34,10 @@ const EditBook = () => {
 
     fetch(`http://localhost:3001/api/books/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
       body: JSON.stringify(updatedBook),
     })
       .then(response => {
