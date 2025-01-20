@@ -11,14 +11,11 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Failed to connect to MongoDB', err));
 
-
 const booksRouter = require('./routes/books');
 const authRouter = require('./routes/auth');
 
-
 app.use('/api/books', booksRouter);
 app.use('/api/auth', authRouter);
-
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

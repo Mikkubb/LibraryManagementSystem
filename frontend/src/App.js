@@ -8,6 +8,8 @@ import EditBook from './pages/EditBook';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AddLibrarian from './pages/AddLibrarian';
+import YourProfile from './pages/YourProfile';
+import EditProfile from './pages/EditProfile';
 import PrivateRoute from './PrivateRoute';
 
 const App = () => {
@@ -19,7 +21,6 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
           <Route
             path="/books"
             element={
@@ -49,6 +50,22 @@ const App = () => {
             element={
               <PrivateRoute allowedRoles={['admin']}>
                 <AddLibrarian />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute allowedRoles={['user', 'librarian']}>
+                <YourProfile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile/edit"
+            element={
+              <PrivateRoute allowedRoles={['user', 'librarian']}>
+                <EditProfile />
               </PrivateRoute>
             }
           />

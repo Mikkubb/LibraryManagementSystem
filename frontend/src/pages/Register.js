@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/Register.css';
 
 const Register = () => {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -18,11 +20,13 @@ const Register = () => {
       });
       if (response.ok) {
         alert('User registered successfully');
+        navigate('/login');
       } else {
         alert('Registration failed');
       }
     } catch (error) {
       console.error('Error:', error);
+      alert('An error occurred during registration');
     }
   };
 
