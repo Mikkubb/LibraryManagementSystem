@@ -1,10 +1,11 @@
 const express = require('express');
 const Book = require('../models/Book');
+const authenticateToken = require('../middleware/authenticateToken');
 
 const router = express.Router();
 
 
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const books = await Book.find();
     res.json(books);
@@ -14,7 +15,11 @@ router.get('/', async (req, res) => {
 });
 
 
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin' && req.user.role !== 'librarian') {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+
   const { title, author, genre, isbn, copies } = req.body;
 
   try {
@@ -27,30 +32,11 @@ router.post('/', async (req, res) => {
 });
 
 
-router.get('/:id', async (req, res) => {
-  try {
-    const book = await Book.findById(req.params.id);
-    if (!book) return res.status(404).json({ message: 'Book not found' });
-    res.json(book);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+router.delete('/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin' && req.user.role !== 'librarian') {
+    return res.status(403).json({ message: 'Access denied' });
   }
-});
 
-
-router.put('/:id', async (req, res) => {
-  const { title, author, genre, isbn, copies } = req.body;
-  try {
-    const book = await Book.findByIdAndUpdate(req.params.id, { title, author, genre, isbn, copies }, { new: true });
-    if (!book) return res.status(404).json({ message: 'Book not found' });
-    res.json(book);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-
-router.delete('/:id', async (req, res) => {
   try {
     const book = await Book.findByIdAndDelete(req.params.id);
     if (!book) return res.status(404).json({ message: 'Book not found' });
