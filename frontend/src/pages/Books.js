@@ -4,9 +4,15 @@ import { Button, Table } from 'react-bootstrap';
 
 const Books = () => {
   const [books, setBooks] = useState([]);
+  const userRole = localStorage.getItem('role');
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/books')
+    fetch('http://localhost:3001/api/books', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -15,11 +21,14 @@ const Books = () => {
       })
       .then(data => setBooks(data))
       .catch(error => console.error('Error fetching books:', error));
-  }, []);
+  }, [token]);
 
   const handleDelete = (id) => {
     fetch(`http://localhost:3001/api/books/${id}`, {
       method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
       .then(response => {
         if (response.ok) {
@@ -34,9 +43,11 @@ const Books = () => {
   return (
     <div className="container mt-3">
       <h1>BOOKS</h1>
-      <Button variant="primary" as={Link} to="/books/add">
-        Add Book
-      </Button>
+      {(userRole === 'admin' || userRole === 'librarian') && (
+        <Button variant="primary" as={Link} to="/books/add">
+          Add Book
+        </Button>
+      )}
       {books.length === 0 ? (
         <p>No books available.</p>
       ) : (
@@ -62,20 +73,34 @@ const Books = () => {
                 <td>{book.isbn}</td>
                 <td>{book.copies}</td>
                 <td>
-                  <Button
-                    variant="warning"
-                    as={Link}
-                    to={`/books/edit/${book._id}`}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    className="ml-2"
-                    onClick={() => handleDelete(book._id)}
-                  >
-                    Delete
-                  </Button>
+                  {/* Przyciski dla Admina i Bibliotekarza */}
+                  {(userRole === 'admin' || userRole === 'librarian') && (
+                    <>
+                      <Button
+                        variant="warning"
+                        as={Link}
+                        to={`/books/edit/${book._id}`}
+                        className="mr-2"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDelete(book._id)}
+                        className="mr-2"
+                      >
+                        Delete
+                      </Button>
+                      <Button variant="info" className="mr-2">
+                        Reviews
+                      </Button>
+                      <Button variant="success">Rent</Button>
+                    </>
+                  )}
+                  {/* Przyciski dla Zwykłego Użytkownika */}
+                  {userRole === 'user' && (
+                    <Button variant="info">Reviews</Button>
+                  )}
                 </td>
               </tr>
             ))}
