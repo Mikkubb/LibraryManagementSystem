@@ -6,8 +6,10 @@ import '../styles/Navbar.css';
 const NavBar = () => {
   const navigate = useNavigate();
 
+
   const isLoggedIn = !!localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
+
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -55,7 +57,7 @@ const NavBar = () => {
           {isLoggedIn && userRole === 'user' && (
             <>
               <Nav.Link as={Link} to="/books">BOOKS</Nav.Link>
-              <Nav.Link as={Link} to="/rentals">RENTALS</Nav.Link>
+              <Nav.Link as={Link} to="/user-rentals">RENTALS</Nav.Link>
               <Nav.Link as={Link} to="/profile">YOUR PROFILE</Nav.Link>
               <Nav.Link onClick={handleLogout}>LOGOUT</Nav.Link>
             </>
