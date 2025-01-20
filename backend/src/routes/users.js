@@ -1,27 +1,38 @@
 const express = require('express');
 const User = require('../models/User');
+const authenticateToken = require('../middleware/authenticateToken');
 const authorizeRole = require('../middleware/authorizeRole');
 const router = express.Router();
 
-// Pobierz listę wszystkich użytkowników (tylko dla admina)
-router.get('/', authorizeRole('admin'), async (req, res) => {
+// Pobierz listę wszystkich użytkowników (z wykluczeniem adminów, dostępne dla admina i bibliotekarza)
+router.get('/', authenticateToken, authorizeRole(['admin', 'librarian']), async (req, res) => {
   try {
-    const users = await User.find({}, '-password');
+    const users = await User.find({ role: { $ne: 'admin' } }, '-password');
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Zmień rolę użytkownika (tylko dla admina)
-router.put('/:id/role', authorizeRole('admin'), async (req, res) => {
-  const { role } = req.body;
-  if (!['user', 'librarian', 'admin'].includes(role)) {
-    return res.status(400).json({ message: 'Invalid role specified' });
+// Pobierz szczegóły użytkownika (dostępne dla admina i bibliotekarza)
+router.get('/:id', authenticateToken, authorizeRole(['admin', 'librarian']), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id, '-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
+});
+
+// Edycja danych użytkownika (bez edycji roli, dostępne dla admina i bibliotekarza)
+router.put('/:id', authenticateToken, authorizeRole(['admin', 'librarian']), async (req, res) => {
+  const { email, firstName, lastName, password } = req.body;
+  const updateFields = { email, firstName, lastName };
+  if (password) updateFields.password = password;
 
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
+    const user = await User.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
   } catch (error) {
@@ -29,8 +40,8 @@ router.put('/:id/role', authorizeRole('admin'), async (req, res) => {
   }
 });
 
-// Usuń użytkownika (tylko dla admina)
-router.delete('/:id', authorizeRole('admin'), async (req, res) => {
+// Usuń użytkownika (dostępne dla admina i bibliotekarza)
+router.delete('/:id', authenticateToken, authorizeRole(['admin', 'librarian']), async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });

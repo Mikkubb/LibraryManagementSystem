@@ -5,7 +5,6 @@ import '../styles/Profile.css';
 const YourProfile = () => {
   const navigate = useNavigate();
 
-
   const userData = localStorage.getItem('user');
   let user = null;
   try {
@@ -14,18 +13,15 @@ const YourProfile = () => {
     console.error('Error parsing user data:', error);
   }
 
-
   useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
 
-
   if (!user) {
     return <p>Loading...</p>;
   }
-
 
   return (
     <div className="profile-container">

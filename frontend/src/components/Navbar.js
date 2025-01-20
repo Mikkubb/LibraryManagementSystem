@@ -6,10 +6,8 @@ import '../styles/Navbar.css';
 const NavBar = () => {
   const navigate = useNavigate();
 
-
   const isLoggedIn = !!localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
-
 
   const handleLogout = () => {
     localStorage.removeItem('token');

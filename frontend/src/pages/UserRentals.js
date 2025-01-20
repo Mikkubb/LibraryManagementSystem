@@ -4,30 +4,30 @@ import { Table } from 'react-bootstrap';
 const UserRentals = () => {
   const [rentals, setRentals] = useState([]);
   const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user'));
+  const currentUser = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/rentals', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    fetch(`http://localhost:3001/api/rentals/user/${currentUser.userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
-        const userRentals = data.filter(rental => rental.user.userId === user.userId);
-        setRentals(userRentals);
+        if (Array.isArray(data)) {
+          setRentals(data);
+        } else {
+          console.error('Unexpected response format:', data);
+          setRentals([]);
+        }
       })
-      .catch(error => console.error('Error fetching rentals:', error));
-  }, [token, user.userId]);
+      .catch(error => {
+        console.error('Error fetching user rentals:', error);
+        setRentals([]);
+      });
+  }, [token, currentUser.userId]);
 
   return (
     <div className="container mt-3">
-      <h1>RENTALS</h1>
+      <h1>YOUR RENTALS</h1>
       {rentals.length === 0 ? (
         <p>You have no rentals at the moment.</p>
       ) : (
@@ -45,8 +45,8 @@ const UserRentals = () => {
           <tbody>
             {rentals.map((rental) => (
               <tr key={rental._id}>
-                <td>{rental.user.userId}</td>
-                <td>{rental.user.email}</td>
+                <td>{currentUser.userId}</td>
+                <td>{currentUser.email}</td>
                 <td>{rental.book.bookId}</td>
                 <td>{rental.book.title}</td>
                 <td>{new Date(rental.dateOfRental).toLocaleDateString()}</td>

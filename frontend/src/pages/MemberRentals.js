@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
-const Rentals = () => {
+const MemberRentals = () => {
+  const { userId } = useParams();
   const [rentals, setRentals] = useState([]);
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/rentals', {
-      headers: { Authorization: `Bearer ${token}` },
+    fetch(`http://localhost:3001/api/rentals/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
       .then(response => response.json())
       .then(data => {
@@ -21,13 +24,14 @@ const Rentals = () => {
         }
       })
       .catch(error => {
-        console.error('Error fetching rentals:', error);
+        console.error('Error fetching user rentals:', error);
         setRentals([]);
       });
-  }, [token]);
+  }, [token, userId]);
 
   const handlePostpone = (rental) => {
-    navigate(`/rentals/postpone/${rental._id}`, { state: { rental, returnUrl: '/rentals' } });
+    const returnUrl = `/members/rentals/${userId}`;
+    navigate(`/rentals/postpone/${rental._id}`, { state: { rental, returnUrl } });
   };
 
   const handleReturn = async (rentalId) => {
@@ -51,9 +55,9 @@ const Rentals = () => {
 
   return (
     <div className="container mt-3">
-      <h1>ALL RENTALS</h1>
+      <h1>RENTALS FOR USER {userId}</h1>
       {rentals.length === 0 ? (
-        <p>No rentals found.</p>
+        <p>This user has no rentals.</p>
       ) : (
         <Table striped bordered hover className="mt-3">
           <thead>
@@ -68,7 +72,7 @@ const Rentals = () => {
             </tr>
           </thead>
           <tbody>
-            {rentals.map(rental => (
+            {rentals.map((rental) => (
               <tr key={rental._id}>
                 <td>{rental.user.userId}</td>
                 <td>{rental.user.email}</td>
@@ -77,7 +81,7 @@ const Rentals = () => {
                 <td>{new Date(rental.dateOfRental).toLocaleDateString()}</td>
                 <td>{new Date(rental.dateToReturn).toLocaleDateString()}</td>
                 <td>
-                  <Button variant="warning" onClick={() => handlePostpone(rental)}>Postpone</Button>
+                  <Button variant="warning" onClick={() => handlePostpone(rental)} className="mr-2">Postpone</Button>
                   <Button variant="danger" onClick={() => handleReturn(rental._id)}>Return</Button>
                 </td>
               </tr>
@@ -89,4 +93,4 @@ const Rentals = () => {
   );
 };
 
-export default Rentals;
+export default MemberRentals;
