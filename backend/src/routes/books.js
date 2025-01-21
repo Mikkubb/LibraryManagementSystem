@@ -1,5 +1,7 @@
 const express = require('express');
 const Book = require('../models/Book');
+const Rental = require('../models/Rental');
+const Review = require('../models/Review');
 const authenticateToken = require('../middleware/authenticateToken');
 
 const router = express.Router();
@@ -70,11 +72,24 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 
   try {
-    const book = await Book.findByIdAndDelete(req.params.id);
+    const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ message: 'Book not found' });
-    res.json({ message: 'Book deleted successfully' });
+
+    
+    const activeRentals = await Rental.find({ book: book._id });
+    if (activeRentals.length > 0) {
+      return res.status(400).json({ message: 'Book is currently rented and cannot be deleted.' });
+    }
+
+    
+    await Review.deleteMany({ book: book._id });
+
+    
+    await Book.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Book deleted successfully, including associated reviews.' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error deleting book:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 

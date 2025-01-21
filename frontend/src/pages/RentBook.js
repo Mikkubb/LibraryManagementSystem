@@ -5,7 +5,7 @@ import '../styles/RentBook.css';
 const RentBook = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { bookId, title } = location.state || { bookId: '', title: '' };
+  const { bookId = 'ND', title = 'ND' } = location.state || {};
 
   const [userId, setUserId] = useState('');
   const [dateToReturn, setDateToReturn] = useState('');
@@ -15,8 +15,13 @@ const RentBook = () => {
     e.preventDefault();
     const dateOfRental = new Date().toISOString().split('T')[0];
 
-    if (dateToReturn <= dateOfRental) {
+    if (!dateToReturn || dateToReturn <= dateOfRental) {
       setError("Return date must be later than the rental date.");
+      return;
+    }
+
+    if (!userId || isNaN(userId)) {
+      setError("Invalid User ID. Please enter a valid numeric User ID.");
       return;
     }
 
@@ -25,19 +30,21 @@ const RentBook = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({ bookId, userId, dateToReturn }),
       });
+
       if (response.ok) {
         alert('Book rented successfully');
         navigate('/rentals');
       } else {
         const errorData = await response.json();
-        alert(`Failed to rent book: ${errorData.message}`);
+        alert(`Failed to rent book: ${errorData.message || 'Unexpected error occurred'}`);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error renting book:', error);
+      alert('An unexpected error occurred while renting the book.');
     }
   };
 
@@ -47,16 +54,19 @@ const RentBook = () => {
       <form onSubmit={handleSubmit}>
         <label>Book ID</label>
         <input type="text" value={bookId} readOnly />
-        
+
         <label>Title</label>
         <input type="text" value={title} readOnly />
-        
+
         <label>User ID</label>
         <input
           type="text"
           placeholder="Enter User ID"
           value={userId}
-          onChange={(e) => setUserId(e.target.value)}
+          onChange={(e) => {
+            setUserId(e.target.value);
+            setError('');
+          }}
           required
         />
 
@@ -70,7 +80,7 @@ const RentBook = () => {
           }}
           required
         />
-        
+
         {error && <p className="error">{error}</p>}
 
         <button type="submit" className="save-button">Rent</button>

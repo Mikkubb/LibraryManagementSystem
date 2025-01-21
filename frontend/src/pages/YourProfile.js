@@ -13,6 +13,11 @@ const YourProfile = () => {
     console.error('Error parsing user data:', error);
   }
 
+  const userId = user?.userId || 'ND';
+  const email = user?.email || 'ND';
+  const firstName = user?.firstName || 'ND';
+  const lastName = user?.lastName || 'ND';
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -26,12 +31,14 @@ const YourProfile = () => {
   return (
     <div className="profile-container">
       <h2>YOUR PROFILE</h2>
-      <p><strong>ID:</strong> {user.userId}</p>
-      <p><strong>Email:</strong> {user.email}</p>
-      <p><strong>First Name:</strong> {user.firstName}</p>
-      <p><strong>Last Name:</strong> {user.lastName}</p>
+      <p><strong>ID:</strong> {userId}</p>
+      <p><strong>Email:</strong> {email}</p>
+      <p><strong>First Name:</strong> {firstName}</p>
+      <p><strong>Last Name:</strong> {lastName}</p>
       <div style={{ display: 'flex', marginTop: '20px' }}>
-        <button className="save-button" onClick={() => navigate('/profile/edit')}>Edit Profile</button>
+        <button className="save-button" onClick={() => navigate('/profile/edit')}>
+          Edit Profile
+        </button>
       </div>
     </div>
   );

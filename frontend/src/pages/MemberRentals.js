@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
+import '../styles/ColumnWidth.css';
+import '../styles/Rentals.css';
 
 const MemberRentals = () => {
   const { userId } = useParams();
@@ -53,9 +55,14 @@ const MemberRentals = () => {
     }
   };
 
+  const isOverdue = (dateToReturn) => {
+    const today = new Date();
+    return dateToReturn && new Date(dateToReturn) < today;
+  };
+
   return (
     <div className="container mt-3">
-      <h1>RENTALS FOR USER {userId}</h1>
+      <h1>RENTALS FOR USER {userId || 'ND'}</h1>
       {rentals.length === 0 ? (
         <p>This user has no rentals.</p>
       ) : (
@@ -73,16 +80,16 @@ const MemberRentals = () => {
           </thead>
           <tbody>
             {rentals.map((rental) => (
-              <tr key={rental._id}>
-                <td>{rental.user.userId}</td>
-                <td>{rental.user.email}</td>
-                <td>{rental.book.bookId}</td>
-                <td>{rental.book.title}</td>
-                <td>{new Date(rental.dateOfRental).toLocaleDateString()}</td>
-                <td>{new Date(rental.dateToReturn).toLocaleDateString()}</td>
+              <tr key={rental._id} className={isOverdue(rental.dateToReturn) ? 'overdue' : ''}>
+                <td>{rental.user?.userId || 'ND'}</td>
+                <td className="table-wrap">{rental.user?.email || 'ND'}</td>
+                <td>{rental.book?.bookId || 'ND'}</td>
+                <td className="table-wrap">{rental.book?.title || 'ND'}</td>
+                <td>{rental.dateOfRental ? new Date(rental.dateOfRental).toLocaleDateString() : 'ND'}</td>
+                <td>{rental.dateToReturn ? new Date(rental.dateToReturn).toLocaleDateString() : 'ND'}</td>
                 <td>
-                  <Button variant="warning" onClick={() => handlePostpone(rental)} className="mr-2">Postpone</Button>
-                  <Button variant="danger" onClick={() => handleReturn(rental._id)}>Return</Button>
+                  <Button variant="warning" onClick={() => handlePostpone(rental)} className="mr-2" disabled={!rental.user || !rental.book} >Postpone</Button>
+                  <Button variant="danger" onClick={() => handleReturn(rental._id)} disabled={!rental.user || !rental.book} >Return</Button>
                 </td>
               </tr>
             ))}

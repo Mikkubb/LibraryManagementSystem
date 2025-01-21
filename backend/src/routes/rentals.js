@@ -11,6 +11,7 @@ router.get('/', async (req, res) => {
       .populate('user', 'userId email')
       .populate('book', 'bookId title');
     res.json(rentals);
+
   } catch (error) {
     console.error('Error fetching rentals:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -28,6 +29,7 @@ router.get('/user/:userId', async (req, res) => {
       .populate('user', 'userId email')
       .populate('book', 'bookId title');
     res.json(rentals);
+
   } catch (error) {
     console.error('Error fetching user rentals:', error);
     res.status(500).json({ message: 'Internal Server Error' });

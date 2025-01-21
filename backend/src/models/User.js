@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['user', 'librarian', 'admin'], default: 'user' }
 });
 
+
 userSchema.pre('save', async function (next) {
   if (this.isNew) {
     const lastUser = await mongoose.model('User').findOne().sort({ userId: -1 });
@@ -18,3 +19,4 @@ userSchema.pre('save', async function (next) {
 });
 
 module.exports = mongoose.model('User', userSchema);
+

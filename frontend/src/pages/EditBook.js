@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Alert } from 'react-bootstrap';
 
 const EditBook = () => {
   const { id } = useParams();
@@ -9,6 +9,7 @@ const EditBook = () => {
   const [genre, setGenre] = useState('');
   const [isbn, setIsbn] = useState('');
   const [copies, setCopies] = useState('');
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,15 +18,26 @@ const EditBook = () => {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
     })
-      .then(response => response.json())
-      .then(data => {
-        setTitle(data.title);
-        setAuthor(data.author);
-        setGenre(data.genre);
-        setIsbn(data.isbn);
-        setCopies(data.copies);
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Book not found');
+          }
+          throw new Error('Failed to fetch book details');
+        }
+        return response.json();
       })
-      .catch(error => console.error('Error fetching book details:', error));
+      .then(data => {
+        setTitle(data.title || 'ND');
+        setAuthor(data.author || 'ND');
+        setGenre(data.genre || 'ND');
+        setIsbn(data.isbn || 'ND');
+        setCopies(data.copies || 0);
+      })
+      .catch(error => {
+        console.error('Error fetching book details:', error);
+        setError(error.message);
+      });
   }, [id]);
 
   const handleSubmit = (event) => {
@@ -52,6 +64,18 @@ const EditBook = () => {
         alert('Failed to update book');
       });
   };
+
+  if (error) {
+    return (
+      <div className="container mt-3">
+        <Alert variant="danger">
+          <h4>Error</h4>
+          <p>{error}</p>
+        </Alert>
+        <Button variant="secondary" onClick={() => navigate('/books')}>Back to Books</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mt-3">

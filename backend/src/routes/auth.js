@@ -1,5 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
+const Rental = require('../models/Rental');
+const Review = require('../models/Review');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const authenticateToken = require('../middleware/authenticateToken');
@@ -7,7 +9,7 @@ const authorizeRole = require('../middleware/authorizeRole');
 
 const router = express.Router();
 
-// Endpoint do rejestracji użytkownika
+// Endpoint rejestracji nowego użytkownika
 router.post('/register', async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
@@ -26,6 +28,7 @@ router.post('/register', async (req, res) => {
       password: hashedPassword,
       role: 'user'
     });
+    
 
     await user.save();
     res.status(201).json({ message: 'User registered successfully' });
@@ -34,7 +37,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Endpoint do rejestracji bibliotekarza (tylko dla admina)
+// Endpoint rejestracji bibliotekarza (dostępny tylko dla adminów)
 router.post('/registerLibrarian', authenticateToken, authorizeRole('admin'), async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
@@ -61,9 +64,10 @@ router.post('/registerLibrarian', authenticateToken, authorizeRole('admin'), asy
   }
 });
 
-// Endpoint do logowania
+// Endpoint logowania użytkownika
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'User not found' });
@@ -72,7 +76,7 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ userId: user._id, role: user.role }, 'your_secret_key', { expiresIn: '1h' });
-    
+
     res.json({
       token,
       role: user.role,
@@ -82,6 +86,7 @@ router.post('/login', async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
+        _id: user._id,
       }
     });
   } catch (err) {
@@ -89,7 +94,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Endpoint do aktualizacji profilu
+// Endpoint aktualizacji profilu użytkownika
 router.put('/update', authenticateToken, async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
   const userId = req.user.userId;
@@ -114,17 +119,27 @@ router.put('/update', authenticateToken, async (req, res) => {
   }
 });
 
-// Endpoint do usunięcia konta użytkownika
+// Endpoint do usuwania profilu użytkownika
 router.delete('/delete', authenticateToken, async (req, res) => {
   const userId = req.user.userId;
 
   try {
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    res.json({ message: 'Account deleted successfully' });
+    const activeRentals = await Rental.find({ user: userId });
+    if (activeRentals.length > 0) {
+      return res.status(400).json({ message: 'User has active rentals and cannot be deleted.' });
+    }
+
+    await Review.deleteMany({ user: userId });
+
+    await User.findByIdAndDelete(userId);
+
+    res.json({ message: 'Account deleted successfully, including associated reviews.' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error deleting account:', err);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
