@@ -22,7 +22,8 @@ const Register = () => {
         alert('User registered successfully');
         navigate('/login');
       } else {
-        alert('Registration failed');
+        const data = await response.json();
+        alert(data.message || 'Registration failed');
       }
     } catch (error) {
       console.error('Error:', error);

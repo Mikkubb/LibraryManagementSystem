@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Table } from 'react-bootstrap';
+import '../styles/ColumnWidth.css';
+import '../styles/Rentals.css';
 
 const UserRentals = () => {
   const [rentals, setRentals] = useState([]);
   const token = localStorage.getItem('token');
-  const currentUser = JSON.parse(localStorage.getItem('user'));
+  const currentUser = JSON.parse(localStorage.getItem('user')) || { userId: 'ND', email: 'ND' };
 
   useEffect(() => {
+    if (currentUser.userId === 'ND') {
+      console.error('User ID not found in localStorage');
+      return;
+    }
+
     fetch(`http://localhost:3001/api/rentals/user/${currentUser.userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -24,6 +31,11 @@ const UserRentals = () => {
         setRentals([]);
       });
   }, [token, currentUser.userId]);
+
+  const isOverdue = (dateToReturn) => {
+    const today = new Date();
+    return dateToReturn && new Date(dateToReturn) < today;
+  };
 
   return (
     <div className="container mt-3">
@@ -44,13 +56,13 @@ const UserRentals = () => {
           </thead>
           <tbody>
             {rentals.map((rental) => (
-              <tr key={rental._id}>
-                <td>{currentUser.userId}</td>
-                <td>{currentUser.email}</td>
-                <td>{rental.book.bookId}</td>
-                <td>{rental.book.title}</td>
-                <td>{new Date(rental.dateOfRental).toLocaleDateString()}</td>
-                <td>{new Date(rental.dateToReturn).toLocaleDateString()}</td>
+              <tr key={rental._id} className={isOverdue(rental.dateToReturn) ? 'overdue' : ''}>
+                <td>{currentUser.userId || 'ND'}</td>
+                <td className="table-wrap">{currentUser.email || 'ND'}</td>
+                <td>{rental.book?.bookId || 'ND'}</td>
+                <td className="table-wrap">{rental.book?.title || 'ND'}</td>
+                <td>{rental.dateOfRental ? new Date(rental.dateOfRental).toLocaleDateString() : 'ND'}</td>
+                <td>{rental.dateToReturn ? new Date(rental.dateToReturn).toLocaleDateString() : 'ND'}</td>
               </tr>
             ))}
           </tbody>

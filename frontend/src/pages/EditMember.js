@@ -8,11 +8,13 @@ const EditMember = () => {
   const token = localStorage.getItem('token');
 
   const [form, setForm] = useState({
-    email: '',
-    firstName: '',
-    lastName: '',
+    email: 'ND',
+    firstName: 'ND',
+    lastName: 'ND',
     password: '',
   });
+
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetch(`http://localhost:3001/api/users/${id}`, {
@@ -20,21 +22,26 @@ const EditMember = () => {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 404) throw new Error('Member not found');
+          throw new Error('Failed to fetch member details');
+        }
+        return response.json();
+      })
       .then(data => setForm({
-        email: data.email || '',
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
+        email: data.email || 'ND',
+        firstName: data.firstName || 'ND',
+        lastName: data.lastName || 'ND',
         password: '',
       }))
       .catch(error => {
-        console.error('Error fetching user details:', error);
-        alert('Error fetching user details');
-        navigate('/members');
+        console.error('Error fetching member details:', error);
+        setError(error.message);
       });
-  }, [id, token, navigate]);
+  }, [id, token]);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value || '' });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value || 'ND' });
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -56,8 +63,19 @@ const EditMember = () => {
       }
     } catch (error) {
       console.error('Error updating member:', error);
+      alert('An unexpected error occurred.');
     }
   };
+
+  if (error) {
+    return (
+      <div className="edit-profile-container">
+        <h2>Error</h2>
+        <p>{error}</p>
+        <button className="save-button" onClick={() => navigate('/members')}>Back to Members</button>
+      </div>
+    );
+  }
 
   return (
     <div className="edit-profile-container">

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Table } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Button, Table, FormControl } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import '../styles/ColumnWidth.css';
 
 const Members = () => {
   const [members, setMembers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const token = localStorage.getItem('token');
-  const navigate = useNavigate();
+  const loggedUser = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     fetch('http://localhost:3001/api/users', {
@@ -25,6 +27,11 @@ const Members = () => {
   }, [token]);
 
   const handleDelete = async (userId) => {
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this user? This will also delete their reviews.'
+    );
+    if (!confirmDelete) return;
+
     try {
       const response = await fetch(`http://localhost:3001/api/users/${userId}`, {
         method: 'DELETE',
@@ -32,20 +39,35 @@ const Members = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      const data = await response.json();
+
       if (response.ok) {
         alert('User deleted successfully');
         setMembers(members.filter(member => member._id !== userId));
       } else {
-        alert('Failed to delete user');
+        alert(data.message || 'Failed to delete user');
       }
     } catch (error) {
       console.error('Error deleting user:', error);
+      alert('An unexpected error occurred while deleting the user.');
     }
   };
+
+  const filteredMembers = members.filter(member =>
+    member.userId?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="container mt-3">
       <h1>MEMBERS</h1>
+      <FormControl
+        type="text"
+        placeholder="Search by USER_ID..."
+        className="mt-3 mb-3"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
       <Table striped bordered hover className="mt-3">
         <thead>
           <tr>
@@ -57,16 +79,37 @@ const Members = () => {
           </tr>
         </thead>
         <tbody>
-          {members.map((member) => (
+          {filteredMembers.map((member) => (
             <tr key={member._id}>
-              <td>{member.userId}</td>
-              <td>{member.email}</td>
-              <td>{member.firstName}</td>
-              <td>{member.lastName}</td>
+              <td>{member.userId || 'ND'}</td>
+              <td className="table-wrap" >{member.email || 'ND'}</td>
+              <td className="table-wrap" >{member.firstName || 'ND'}</td>
+              <td className="table-wrap" >{member.lastName || 'ND'}</td>
               <td>
-                <Button variant="warning" as={Link} to={`/members/edit/${member._id}`} className="mr-2">Edit</Button>
-                <Button variant="danger" onClick={() => handleDelete(member._id)} className="mr-2">Delete</Button>
-                <Button variant="success" as={Link} to={`/members/rentals/${member.userId}`}>Rentals</Button>
+                <Button
+                  variant="warning"
+                  as={Link}
+                  to={`/members/edit/${member._id}`}
+                  className="mr-2"
+                  disabled={loggedUser && loggedUser._id === member._id}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => handleDelete(member._id)}
+                  className="mr-2"
+                  disabled={loggedUser && loggedUser._id === member._id}
+                >
+                  Delete
+                </Button>
+                <Button
+                  variant="success"
+                  as={Link}
+                  to={`/members/rentals/${member.userId}`}
+                >
+                  Rentals
+                </Button>
               </td>
             </tr>
           ))}

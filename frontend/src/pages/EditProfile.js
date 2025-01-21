@@ -1,17 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Profile.css';
 
 const EditProfile = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
   const navigate = useNavigate();
+  const storedUser = localStorage.getItem('user');
+  
+  const [user] = useState(() => {
+    try {
+      return JSON.parse(storedUser) || {};
+    } catch {
+      return {};
+    }
+  });
 
   const [form, setForm] = useState({
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
+    email: user.email || 'ND',
+    firstName: user.firstName || 'ND',
+    lastName: user.lastName || 'ND',
     password: '',
   });
+
+  useEffect(() => {
+    if (!user || !user.email) {
+      alert('User data not found. Please log in again.');
+      navigate('/login');
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -47,20 +62,21 @@ const EditProfile = () => {
     if (window.confirm('Are you sure you want to delete your account?')) {
       try {
         const token = localStorage.getItem('token');
-        
+  
         const response = await fetch('http://localhost:3001/api/auth/delete', {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
+  
         if (response.ok) {
           localStorage.clear();
           alert('Account deleted successfully');
           navigate('/');
         } else {
-          alert('Failed to delete account');
+          const data = await response.json();
+          alert(data.message || 'Failed to delete account');
         }
       } catch (error) {
         console.error('Error deleting account:', error);

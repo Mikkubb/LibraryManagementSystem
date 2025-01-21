@@ -17,6 +17,7 @@ import UserRentals from './pages/UserRentals';
 import Members from './pages/Members';
 import EditMember from './pages/EditMember';
 import MemberRentals from './pages/MemberRentals';
+import Reviews from './pages/Reviews';
 import PrivateRoute from './PrivateRoute';
 
 const App = () => {
@@ -41,6 +42,7 @@ const App = () => {
           <Route path="/members" element={<PrivateRoute allowedRoles={['librarian', 'admin']}><Members /></PrivateRoute>} />
           <Route path="/members/edit/:id" element={<PrivateRoute allowedRoles={['librarian', 'admin']}><EditMember /></PrivateRoute>} />
           <Route path="/members/rentals/:userId" element={<PrivateRoute allowedRoles={['admin', 'librarian']}><MemberRentals /></PrivateRoute>} />
+          <Route path="/books/:bookId/reviews" element={<PrivateRoute allowedRoles={['user', 'librarian', 'admin']}><Reviews /></PrivateRoute>} />
         </Routes>
       </div>
     </Router>
