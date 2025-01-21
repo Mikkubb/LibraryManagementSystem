@@ -14,10 +14,12 @@ mongoose.connect(process.env.MONGO_URI)
 const booksRouter = require('./routes/books');
 const authRouter = require('./routes/auth');
 const rentalsRouter = require('./routes/rentals');
+const usersRouter = require('./routes/users');
 
 app.use('/api/books', booksRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/rentals', rentalsRouter);
+app.use('/api/users', usersRouter);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

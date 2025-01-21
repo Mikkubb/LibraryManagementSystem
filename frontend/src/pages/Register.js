@@ -34,10 +34,36 @@ const Register = () => {
     <div className="register-container">
       <form className="register-form" onSubmit={handleSubmit}>
         <h2>REGISTER</h2>
-        <input name="firstName" placeholder="First Name" onChange={handleChange} required />
-        <input name="lastName" placeholder="Last Name" onChange={handleChange} required />
-        <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
-        <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
+        <input 
+          name="firstName" 
+          placeholder="First Name" 
+          onChange={handleChange} 
+          required 
+          autoComplete="given-name" 
+        />
+        <input 
+          name="lastName" 
+          placeholder="Last Name" 
+          onChange={handleChange} 
+          required 
+          autoComplete="family-name" 
+        />
+        <input 
+          type="email" 
+          name="email" 
+          placeholder="Email" 
+          onChange={handleChange} 
+          required 
+          autoComplete="email" 
+        />
+        <input 
+          type="password" 
+          name="password" 
+          placeholder="Password" 
+          onChange={handleChange} 
+          required 
+          autoComplete="new-password" 
+        />
         <button type="submit">Create Account</button>
       </form>
     </div>

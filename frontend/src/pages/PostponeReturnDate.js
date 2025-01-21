@@ -5,7 +5,7 @@ import '../styles/PostponeReturnDate.css';
 const PostponeReturnDate = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { rental } = location.state || {};
+  const { rental, returnUrl } = location.state || {};
 
   const [newDateToReturn, setNewDateToReturn] = useState(rental?.dateToReturn || '');
   const [error, setError] = useState('');
@@ -30,7 +30,7 @@ const PostponeReturnDate = () => {
       });
       if (response.ok) {
         alert('Return date postponed successfully');
-        navigate('/rentals');
+        navigate(returnUrl || '/rentals');
       } else {
         alert('Failed to postpone return date');
       }
@@ -43,9 +43,10 @@ const PostponeReturnDate = () => {
     <div className="postpone-container">
       <h2>CHANGE RETURN DATE</h2>
       <form onSubmit={handleSave}>
-        <label>Date to return</label>
+        <label htmlFor="dateToReturn">Date to return</label>
         <input
           type="date"
+          id="dateToReturn"
           value={newDateToReturn}
           min={dateOfRental}
           onChange={(e) => {

@@ -37,8 +37,22 @@ const Login = () => {
     <div className="login-container">
       <form className="login-form" onSubmit={handleSubmit}>
         <h2>LOGIN</h2>
-        <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
-        <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
+        <input 
+          type="email" 
+          name="email" 
+          placeholder="Email" 
+          onChange={handleChange} 
+          required 
+          autoComplete="email" 
+        />
+        <input 
+          type="password" 
+          name="password" 
+          placeholder="Password" 
+          onChange={handleChange} 
+          required 
+          autoComplete="current-password" 
+        />
         <button type="submit">Sign In</button>
       </form>
     </div>

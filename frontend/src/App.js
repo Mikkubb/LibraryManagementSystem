@@ -14,6 +14,9 @@ import Rentals from './pages/Rentals';
 import RentBook from './pages/RentBook';
 import PostponeReturnDate from './pages/PostponeReturnDate';
 import UserRentals from './pages/UserRentals';
+import Members from './pages/Members';
+import EditMember from './pages/EditMember';
+import MemberRentals from './pages/MemberRentals';
 import PrivateRoute from './PrivateRoute';
 
 const App = () => {
@@ -35,6 +38,9 @@ const App = () => {
           <Route path="/rent-book" element={<PrivateRoute allowedRoles={['librarian', 'admin']}><RentBook /></PrivateRoute>} />
           <Route path="/rentals/postpone/:id" element={<PrivateRoute allowedRoles={['librarian', 'admin']}><PostponeReturnDate /></PrivateRoute>} />
           <Route path="/user-rentals" element={<PrivateRoute allowedRoles={['user']}><UserRentals /></PrivateRoute>} />
+          <Route path="/members" element={<PrivateRoute allowedRoles={['librarian', 'admin']}><Members /></PrivateRoute>} />
+          <Route path="/members/edit/:id" element={<PrivateRoute allowedRoles={['librarian', 'admin']}><EditMember /></PrivateRoute>} />
+          <Route path="/members/rentals/:userId" element={<PrivateRoute allowedRoles={['admin', 'librarian']}><MemberRentals /></PrivateRoute>} />
         </Routes>
       </div>
     </Router>

@@ -73,17 +73,48 @@ const EditProfile = () => {
     <div className="edit-profile-container">
       <h2>EDIT PROFILE</h2>
       <form onSubmit={handleSave}>
-        <label>Email</label>
-        <input type="email" name="email" value={form.email} onChange={handleChange} required />
+        <label htmlFor="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          value={form.email} 
+          onChange={handleChange} 
+          required 
+          autoComplete="email" 
+        />
         
-        <label>First Name</label>
-        <input type="text" name="firstName" value={form.firstName} onChange={handleChange} required />
+        <label htmlFor="firstName">First Name</label>
+        <input 
+          type="text" 
+          id="firstName" 
+          name="firstName" 
+          value={form.firstName} 
+          onChange={handleChange} 
+          required 
+          autoComplete="given-name" 
+        />
         
-        <label>Last Name</label>
-        <input type="text" name="lastName" value={form.lastName} onChange={handleChange} required />
+        <label htmlFor="lastName">Last Name</label>
+        <input 
+          type="text" 
+          id="lastName" 
+          name="lastName" 
+          value={form.lastName} 
+          onChange={handleChange} 
+          required 
+          autoComplete="family-name" 
+        />
         
-        <label>Password</label>
-        <input type="password" name="password" value={form.password} onChange={handleChange} />
+        <label htmlFor="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          value={form.password} 
+          onChange={handleChange} 
+          autoComplete="new-password" 
+        />
         
         <div style={{ display: 'flex', gap: '160px', marginTop: '20px' }}>
           <button className="save-button" type="submit">Save</button>
