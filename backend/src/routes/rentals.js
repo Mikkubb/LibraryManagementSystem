@@ -3,15 +3,16 @@ const router = express.Router();
 const Rental = require('../models/Rental');
 const User = require('../models/User');
 const Book = require('../models/Book');
+const authenticateToken = require('../middleware/authenticateToken');
+const authorizeRole = require('../middleware/authorizeRole');
 
 // Endpoint do pobierania wszystkich wypożyczeń (dla administratora i bibliotekarza)
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, authorizeRole(['admin', 'librarian']), async (req, res) => {
   try {
     const rentals = await Rental.find()
       .populate('user', 'userId email')
       .populate('book', 'bookId title');
     res.json(rentals);
-
   } catch (error) {
     console.error('Error fetching rentals:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -19,7 +20,7 @@ router.get('/', async (req, res) => {
 });
 
 // Endpoint do pobierania wypożyczeń dla konkretnego użytkownika
-router.get('/user/:userId', async (req, res) => {
+router.get('/user/:userId', authenticateToken, async (req, res) => {
   const { userId } = req.params;
   try {
     const user = await User.findOne({ userId });
@@ -29,15 +30,14 @@ router.get('/user/:userId', async (req, res) => {
       .populate('user', 'userId email')
       .populate('book', 'bookId title');
     res.json(rentals);
-
   } catch (error) {
     console.error('Error fetching user rentals:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
-// Endpoint do wypożyczenia książki
-router.post('/rent', async (req, res) => {
+// Endpoint do wypożyczenia książki (dla administratora i bibliotekarza)
+router.post('/rent', authenticateToken, authorizeRole(['admin', 'librarian']), async (req, res) => {
   const { bookId, userId, dateToReturn } = req.body;
   try {
     const user = await User.findOne({ userId });
@@ -64,8 +64,8 @@ router.post('/rent', async (req, res) => {
   }
 });
 
-// Endpoint do przedłużenia terminu zwrotu wypożyczenia
-router.post('/postpone/:id', async (req, res) => {
+// Endpoint do przedłużenia terminu zwrotu wypożyczenia (dla administratora i bibliotekarza)
+router.post('/postpone/:id', authenticateToken, authorizeRole(['admin', 'librarian']), async (req, res) => {
   const { id } = req.params;
   const { newDateToReturn } = req.body;
 
@@ -83,8 +83,8 @@ router.post('/postpone/:id', async (req, res) => {
   }
 });
 
-// Endpoint do zwrotu książki
-router.post('/return/:id', async (req, res) => {
+// Endpoint do zwrotu książki (dla administratora i bibliotekarza)
+router.post('/return/:id', authenticateToken, authorizeRole(['admin', 'librarian']), async (req, res) => {
   const { id } = req.params;
 
   try {

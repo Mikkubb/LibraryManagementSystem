@@ -3,9 +3,10 @@ const router = express.Router();
 const Review = require('../models/Review');
 const Book = require('../models/Book');
 const User = require('../models/User');
+const authenticateToken = require('../middleware/authenticateToken');
 
 // Endpoint do pobierania recenzji dla danej książki
-router.get('/:bookId', async (req, res) => {
+router.get('/:bookId', authenticateToken, async (req, res) => {
   try {
     const reviews = await Review.find({ book: req.params.bookId }).populate('user', 'userId firstName');
     const reviewsWithFallback = reviews.map(review => ({
@@ -13,17 +14,14 @@ router.get('/:bookId', async (req, res) => {
       user: review.user || { userId: 'Anonymous', firstName: 'ND' },
     }));
     res.json(reviewsWithFallback);
-
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
 // Endpoint do dodawania recenzji
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   const { bookId, userId, opinion, rate } = req.body;
-
-
 
   try {
     const book = await Book.findById(bookId);
@@ -46,11 +44,9 @@ router.post('/', async (req, res) => {
     });
 
     const savedReview = await review.save();
-    
     const populatedReview = await savedReview.populate('user', 'userId firstName');
 
     res.status(201).json({ review: populatedReview });
-
   } catch (error) {
     console.error('Error adding review:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -58,7 +54,7 @@ router.post('/', async (req, res) => {
 });
 
 // Endpoint do usuwania recenzji
-router.delete('/:reviewId', async (req, res) => {
+router.delete('/:reviewId', authenticateToken, async (req, res) => {
   try {
     const review = await Review.findByIdAndDelete(req.params.reviewId);
     if (!review) return res.status(404).json({ message: 'Review not found' });
